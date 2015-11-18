@@ -27,7 +27,7 @@ angular.module("wizard.html", []).run(["$templateCache", function($templateCache
 }]);
 
 angular.module('mgo-angular-wizard', ['templates-angularwizard']);
-
+ 
 angular.module('mgo-angular-wizard').directive('wzStep', function() {
     return {
         restrict: 'EA',
