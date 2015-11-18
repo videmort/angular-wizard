@@ -15,12 +15,13 @@ angular.module("step.html", []).run(["$templateCache", function($templateCache) 
 angular.module("wizard.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard.html",
     "<div>\n" +
-    "    <div class=\"steps\" ng-transclude></div>\n" +
     "    <ul class=\"steps-indicator steps-{{getEnabledSteps().length}}\" ng-if=\"!hideIndicators\">\n" +
+    "    <span class=\"steps-bar steps-{{getEnabledSteps().length}}\" ng-class=\"completedStep \" > </span>\n" +
     "      <li ng-class=\"{default: !step.completed && !step.selected, current: step.selected && !step.completed, done: step.completed && !step.selected, editing: step.selected && step.completed}\" ng-repeat=\"step in getEnabledSteps()\">\n" +
-    "        <a ng-click=\"goTo(step)\">{{step.title || step.wzTitle}}</a>\n" +
+    "        <a ng-class=\"stepClass($index)\" ng-click=\"goTo(step)\">{{step.title || step.wzTitle}}</a>\n" +
     "      </li>\n" +
     "    </ul>\n" +
+    "   <div class=\"steps\" ng-transclude></div>\n" +
     "</div>\n" +
     "");
 }]);
@@ -87,7 +88,9 @@ angular.module('mgo-angular-wizard').directive('wizard', function() {
             //watching changes to currentStep
             $scope.$watch('currentStep', function(step) {
                 //checking to make sure currentStep is truthy value
-                if (!step) return;
+                if (!step) {
+                    return;
+                }
                 //setting stepTitle equal to current step title or default title
                 var stepTitle = $scope.selectedStep.title || $scope.selectedStep.wzTitle;
                 if ($scope.selectedStep && stepTitle !== $scope.currentStep) {
@@ -174,6 +177,27 @@ angular.module('mgo-angular-wizard').directive('wizard', function() {
                 }
             };
 
+            $scope.stepClass = stepClass;
+            $scope.completedStep = 'noCompleted';
+
+            function stepClass(index){ 
+                                        
+                if(angular.isUndefinedOrNullOrEmpty($scope.currentStepNumber())){
+                    return;
+                }
+                 if($scope.steps.length === $scope.currentStepNumber()){
+                    if(index===0){
+                        return 'steps-indicator';
+                    }
+                    return 'step-indicator end'
+                }
+                if(index+1===$scope.currentStepNumber() || index===0){
+                    return 'steps-indicator';
+                }
+               
+                return 'steps-indicator deactivate';
+            }
+
             function canEnterStep(step) {
                 var defer,
                     canEnter;
@@ -253,6 +277,8 @@ angular.module('mgo-angular-wizard').directive('wizard', function() {
             };
             //method used for next button within step
             this.next = function(callback) {
+                $scope.completedStep = 'stepCompleted';
+                //completedStep(true);
                 var enabledSteps = $scope.getEnabledSteps();
                 //setting variable equal to step  you were on when next() was invoked
                 var index = _.indexOf(enabledSteps, $scope.selectedStep);
